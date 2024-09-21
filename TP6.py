@@ -57,9 +57,9 @@ def main():
     while(DIAS_A_SIMULAR < dia):
         t = 0
         while(t < TF):
-            tpppf   = intervaloDePedidoPapas(np.random.rand(0.1 , 0.9)) + t
-            tpph    = intervaloDePedidoHamburguesa(np.random.rand(0.1 , 0.9)) + t
-            tppe    = intervaloDePedidoEnsalada(np.random.rand(0.1 , 0.9)) + t
+            tpppf   = intervaloDePedidoPapas(np.random.rand()) + t
+            tpph    = intervaloDePedidoHamburguesa(np.random.rand()) + t
+            tppe    = intervaloDePedidoEnsalada(np.random.rand()) + t
             tplp    = intervaloLimpiezaDePlancha() + t
             proximoPedido = {'Hamburguesa': tpph, 'Ensalada': tppe, 'Papas Fritas': tpppf, 'Limpieza de Plancha': tplp}
             
@@ -67,15 +67,15 @@ def main():
             
             if(proximoEvento == "Papas Fritas"):
                 t = tpppf
-                tpppf = intervaloDePedidoPapas(np.random.rand(0.1 , 0.9)) + t
+                tpppf = intervaloDePedidoPapas(np.random.rand()) + t
                 preparacionPapasFritas(t)
             elif(proximoEvento == "Hamburguesa"):
                 t = tpph
-                tpph = intervaloDePedidoHamburguesa(np.random.rand(0.1 , 0.9)) + t
+                tpph = intervaloDePedidoHamburguesa(np.random.rand()) + t
                 preparacionHamburguesa(t)
             elif(proximoEvento == "Ensalada"):
                 t = tppe
-                tppe = intervaloDePedidoEnsalada(np.random.rand(0.1 , 0.9)) + t
+                tppe = intervaloDePedidoEnsalada(np.random.rand()) + t
                 preparacionEnsalada(t)
 
 
