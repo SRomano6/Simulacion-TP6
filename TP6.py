@@ -26,6 +26,9 @@ def tiempoAtencioHamburguesa(p):
 def tiempoAtencionEnsalada(p):
     return minutos_a_segundos(3*p + 4)
 
+def tiempoAtencionPapasFritas(p):
+    return minutos_a_segundos(5*p + 10)
+
 def minutos_a_segundos(minutos):
     return minutos * 60
 
@@ -42,7 +45,6 @@ def proximoEventoTC(proximoPedido):
     else:
         return ("Limpieza de Plancha")
 
-    return ("hola")
 
 
 TIEMPO_ENTRE_LIMPIEZA_DE_PLANCHAS = minutos_a_segundos(15)
@@ -52,17 +54,46 @@ PRECIO_HAMBURGUESA = 200
 TF = minutos_a_segundos(60*3.5) #simulacion de 3.5 horas
 DIAS_A_SIMULAR = 25 #simulacion de 25 dias 
 
+# Tiempos comprometidos (inicializados en 0 para cada estación)
+tcf = [0]  # Tiempo Comprometido Freidoras
+tcp = [0]  # Tiempo Comprometido Planchas
+tcc = 0  # Tiempo Comprometido Cocineros
+
+# Tiempos ociosos y de espera acumulados
+stof = [0]  # Tiempo Ocioso Freidoras
+stoh = [0]  # Tiempo Ocioso Planchas
+stoe = [0]  # Tiempo Ocioso Estación Ensaladas
+stoc = 0    # Tiempo Ocioso Cocineros
+stop = [0]
+stepf = [0]  # Tiempo de Espera Papas Fritas
+steh = [0]  # Tiempo de Espera Hamburguesas
+stee = [0]  # Tiempo de Espera Ensaladas
+
+# Contadores de pedidos atendidos
+ntpf = [0]  # Número total de pedidos de papas fritas atendidos
+nth = 0   # Número total de pedidos de hamburguesas atendidos
+nte = 0   # Número total de pedidos de ensaladas atendidos
+
+# Sumatorias
+stapf = 0
+stap = 0
+stae = 0
+stac = 0
+stelp = 0
+
+# Arrepentimientos
+arrep = 0
+
 def main():
     dia = 0
     while(DIAS_A_SIMULAR < dia):
         t = 0
+        tpppf   = intervaloDePedidoPapas(np.random.rand()) 
+        tpph    = intervaloDePedidoHamburguesa(np.random.rand()) 
+        tppe    = intervaloDePedidoEnsalada(np.random.rand()) 
+        tplp    = intervaloLimpiezaDePlancha()
         while(t < TF):
-            tpppf   = intervaloDePedidoPapas(np.random.rand()) + t
-            tpph    = intervaloDePedidoHamburguesa(np.random.rand()) + t
-            tppe    = intervaloDePedidoEnsalada(np.random.rand()) + t
-            tplp    = intervaloLimpiezaDePlancha() + t
             proximoPedido = {'Hamburguesa': tpph, 'Ensalada': tppe, 'Papas Fritas': tpppf, 'Limpieza de Plancha': tplp}
-            
             proximoEvento = proximoEventoTC(proximoPedido)
             
             if(proximoEvento == "Papas Fritas"):
@@ -80,146 +111,107 @@ def main():
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
- # Inicializar las variables necesarias
-T = 0  # Tiempo actual en la simulación
-TAPF = 7  # Tiempo de Atención Papas Fritas
-TAH = 9  # Tiempo de Atención Hamburguesa
-TAE = 5  # Tiempo de Atención Ensalada
-
-# Tiempos comprometidos (inicializados en 0 para cada estación)
-TCF = [0]  # Tiempo Comprometido Freidoras
-TCP = [0]  # Tiempo Comprometido Planchas
-TCC = [0]  # Tiempo Comprometido Cocineros
-
-# Tiempos ociosos y de espera acumulados
-STOF = [0]  # Tiempo Ocioso Freidoras
-STOH = [0]  # Tiempo Ocioso Planchas
-STOE = [0]  # Tiempo Ocioso Estación Ensaladas
-STEPF = [0]  # Tiempo de Espera Papas Fritas
-STEH = [0]  # Tiempo de Espera Hamburguesas
-STEE = [0]  # Tiempo de Espera Ensaladas
-
-# Contadores de pedidos atendidos
-NTPF = 0  # Número total de pedidos de papas fritas atendidos
-NTH = 0   # Número total de pedidos de hamburguesas atendidos
-NTE = 0   # Número total de pedidos de ensaladas atendidos
-
-# Función para procesar un pedido de papas fritas
-def procesar_pedido_papas_fritas(T):
-    i_freidora = TCF.index(min(TCF))  # Seleccionar la freidora con menor TCF
-    GENERAR TAPF
-    if T <= TCF[i_freidora]:  # Freidora ocupada
-        STEPF[i] += (TCF[i_freidora] - T)  # Sumar al acumulador de espera
-        TCF[i_freidora] += TAPF  # Actualizar el tiempo comprometido
+def preparacionPapasFritas(t):
+    i_freidora = tcf.index(min(tcf))  # Seleccionar la freidora con menor TCF
+    tapf  = tiempoAtencionPapasFritas(np.random.rand())
+    if t <= tcf[i_freidora]:  # Freidora ocupada
+        stepf[i_freidora] += (tcf[i_freidora] - t)  # Sumar al acumulador de espera
+        tcf[i_freidora] += tapf  # Actualizar el tiempo comprometido
     else:  # Freidora disponible
-        STOF[i_freidora] += (T - TCF[i_freidora])  # Sumar al tiempo ocioso
-        TCF[i_freidora] = T + TAPF  # Actualizar el tiempo comprometido
+        stof[i_freidora] += (t - tcf[i_freidora])  # Sumar al tiempo ocioso
+        tcf[i_freidora] = t + tapf  # Actualizar el tiempo comprometido 
+    stapf[i_freidora] += tapf
+    ntpf[i_freidora] += 1  # Incrementar el contador de pedidos atendidos
+
+
+def preparacionHamburguesa(t):
+    i_plancha = tcp.index(min(TCP))  # Seleccionar la plancha con menor TCP
+    tah = tiempoAtencioHamburguesa(np.random.rand())
     
-    STAPF += TAPF
-    NTPF += 1  # Incrementar el contador de pedidos atendidos
-
-
-
-# Función para procesar un pedido de hamburguesas
-def procesar_pedido_hamburguesa(T):
-    i_plancha = TCP.index(min(TCP))  # Seleccionar la plancha con menor TCP
-    i_cocinero = TCC.index(min(TCC))  # Seleccionar el cocinero con menor TCC
-    
-    # Verificar si tanto la plancha como el cocinero están ocupados
-    if T >= TCP[i_plancha] or T >= TCC[i_cocinero]: # Plancha y cocinero libres
-
-        generar TAH
-
-        STOP[i_plancha] += (T - TCP[i_plancha])  # Sumar al tiempo ocioso de la plancha
-        STOC[i_cocinero] += (T - TCC[i_cocinero])  # Sumar al tiempo ocioso del cocinero
-        TCP[i_plancha] = T + TAH  # Actualizar el tiempo comprometido de la plancha
-        TCC[i_cocinero] = T + TAH  # Actualizar el tiempo comprometido del cocinero
-
-
-        # Si alguno está ocupado, acumulamos el tiempo de espera
-        STEH[i_plancha] += (max(TCH[i_plancha], TCC[i_cocinero]) - T)  # Sumar al acumulador de espera de hamburguesas
-        TCP[i_plancha] += TAH  # Actualizar el tiempo comprometido de la plancha
-        TCC[i_cocinero] += TAH  # Actualizar el tiempo comprometido del cocinero
+    if tcp[i_plancha] > tcc:
+        if t <= tcp[i_plancha]:
+            arrepentimiento = arrepentimientoRut()
+            if not arrepentimiento:
+                tah = tiempoAtencioHamburguesa(np.random.rand())
+                stoc = stoc + (tcp[i_plancha] - tcc) 
+                steh = steh + (tcp[i_plancha] - t)
+                tcp[i_plancha] = tcp[i_plancha] + tah
+                tcc = tcp[i_plancha] + tah
+            else:
+                arrep = arrep + 1
+                pass
+        elif t <= tcc:
+            arrepentimiento = arrepentimientoRut()
+            if not arrepentimiento:
+                tah = tiempoAtencioHamburguesa(np.random.rand())
+                stop[i_plancha] = stop[i_plancha] + (tcc - tcp[i_plancha])
+                steh = steh + (tcc - t)
+                tcp[i_plancha] = tcc + tah
+                tcc = tcc + tah
+            else:
+                arrep = arrep + 1
+                pass
     else:
-        if T <= TCP[i_plancha]:
-        Arrepentimiento
-            if Arr == False:
-            Generar TAH
-                STEH[i_plancha] += (TCP[i_plancha] - T)  # Sumar al acumulador de espera de hamburguesas
-                STOC[i_cocinero] += (TCP[i_plancha] - TCC[i_cocinero])  # Sumar al tiempo ocioso del cocinero
-                TCP[i_plancha] =  TCP[i_plancha] + TAH  # Actualizar el tiempo comprometido de la plancha
-                TCC[i_cocinero] =  TCP[i_plancha] + TAH  # Actualizar el tiempo comprometido del cocinero
-            else: arrep += 1 break
+        tiempoAtencioHamburguesa(np.random.rand())
+        stoc = stoc + (t - tcc)
+        stop = stop + (t - tcp[i_plancha])
+        tcp[i_plancha] = t + tah
+    stac = stac + tah
+    stap = stap + tah
+    nth = nth + 1  
+    chul = chul + 1
+    if chul >= 50:
+        talp = TIEMPO_ENTRE_LIMPIEZA_DE_PLANCHAS #cambiar
+        for i in range(0, len(tcp)):
+            tcp[i] = tcp[i] + talp
+        talp = tcp + 30
+        chul = 0
+    r = np.random.rand()
+    if r <= 0.8: 
+        preparacionPapasFritas(t)
+    else:
+        preparacionEnsalada(t)
 
-        else if T <= TCC[i_cocinero]:
-        Arrepentimiento
-            if Arr == False:
-                Generar TAH
-                STEH[i_plancha] += (TCC[i_cocinero] - T)  # Sumar al acumulador de espera de hamburguesas
-                STOP[i_plancha] += (TCC[i_cocinero] - TCP[i_plancha])  # Sumar al tiempo ocioso del cocinero
-                TCP[i_plancha] =  TCC[i_cocinero] + TAH  # Actualizar el tiempo comprometido de la plancha
-                TCC[i_cocinero] =  TCC[i_cocinero] + TAH  # Actualizar el tiempo comprometido del cocinero
-            else: arrep += 1 break
+def preparacionEnsalada(t):
+    tae = tiempoAtencionEnsalada(np.random.rand())
+    if t <= tcc:
+        stee = stee + (tcc - t)
+        tcc = tcc + tae
+    else:
+        stoc = stoc + (t - tcc)
+        tcc = t + tae
+    stac = stac + tae
+    nte = nte + 1  
+
+def preparacionLimpiezaPlancha(t):
+    i_plancha = tcp.index(min(TCP))  
+    talp = intervaloLimpiezaDePlancha()
+    if t <= tcp[i_plancha]:
+        tcp[i_plancha] = tcp[i_plancha] + talp
+        stelp = stelp + (tcp[i_plancha] - t)
+    else:
+        tcp[i_plancha] = t + talp
+        stop = stop + (t - tcp[i_plancha])
+    chul = 0
+
+def arrepentimientoRut(t, tc):
+    espera = tc - t
+    if espera <= 10:
+        return False
+    else:
+        if espera <= 20:
+            r = np.random.rand()
+            if r <= 0.7:
+                return False
+            else:
+                return True
+        else:
+            if espera <= 40:
+                r = np.random.rand()
+                if r <= 0.2:
+                    return False
+                else:
+                    return True
+            else: 
+                return True
         
-    STAC[i_cocinero] = STAC[i_cocinero] + TAH
-    STAP[i_plancha] = STAP[i_plancha] + TAH
-    NTH += 1  # Incrementar el contador de pedidos de hamburguesas atendidos  
-    CHUL += 1
-    if CHUL >= 50:
-        TPLP = TCP(i_plancha) #ACA NO SE DEBERIA PODER ATENDER NINGUNA HAMBURGUESSA MAS HASTA QUE SE LIMPIE
-
-    random
-    if r <= 0,8: 
-       procesar_pedido_papas_fritas
-    else
-       procesar_pedido_ensalada
-         
-
-# Función para procesar un pedido de ensaladas
-def procesar_pedido_ensalada(T):
-    i_cocinero = TCC.index(min(TCC))  # Seleccionar el cocinero con menor TCC
-    GENERAR TAE
-    if T <= TCC[i_cocinero]:  # Cocineros ocupados
-        STEE[i] += (TCC[i_cocinero] - T)  # Sumar al acumulador del cocinero
-        TCC[i_cocinero] += TAE  # Actualizar el tiempo comprometido del Cocinero
-    else:  # Cocinero libre
-        STOC[i_cocinero] += (T - TCC[i_cocinero])  # Sumar al tiempo ocioso del Cocienro
-        TCE[i_cocinero] = T + TAE  # Actualizar el tiempo comprometido
-    STAC[i_cocinero] = STAC[i_cocinero] + TAE
-    NTE += 1  # Incrementar el contador de pedidos de ensaladas atendidos
-
-
-
-# Función para procesar Limpieza de Plancha
-def procesar_limpieza_plancha(T):
-    i_plancha = TCC.index(MAX(TCP))  # Seleccionar el cocinero con menor TCC
-    GENERAR TALP
-    if T <= TCP[i_plancha]:  # plancha ocupada
-        TCP[1] = TCP(i) + TALP  # Actualizar el tiempo comprometido de la plancha
-        TCP[2] = TCP(i) + TALP  # Actualizar el tiempo comprometido de la plancha
-        TCP[3] = TCP(i) + TALP  # Actualizar el tiempo comprometido de la plancha
-        TCP[4] = TCP(i) + TALP  # Actualizar el tiempo comprometido de la plancha
-        TCP[5] = TCP(i) + TALP  # Actualizar el tiempo comprometido de la plancha
-        TCP[6] = TCP(i) + TALP  # Actualizar el tiempo comprometido de la plancha
-    else:  # Plancha libre
-        TCP[1] = T + TALP  # Actualizar el tiempo comprometido de la plancha
-
-    TPLP = TCP + 30
-    CHUL = 0       
