@@ -7,7 +7,7 @@ def intervaloDePedidoHamburguesa(p):
     loc = -60.91163336519913
     scale = 562.8685676898285
     #return wald.ppf(p, loc, scale) 
-    return minutos_a_segundos(0.1*p + 0.1)
+    return minutos_a_segundos(1*p + 1)
 
 def intervaloDePedidoEnsalada(p):
     a = 0.5480412546272729
@@ -23,7 +23,7 @@ def intervaloDePedidoPapas(p):
     #return pearson3.ppf(p, a, loc, scale)
     return minutos_a_segundos(1*p + 3)
 
-def tiempoAtencioHamburguesa(p):
+def tiempoAtencionHamburguesa(p):
     return minutos_a_segundos(4*p + 6)
 
 def tiempoAtencionEnsalada(p):
@@ -53,13 +53,19 @@ def proximoEventoTC(proximoPedido):
         return ("Papas Fritas")
     else:
         return ("Limpieza de Plancha")
-
+    
+def proximoEvento2(proximoPedido):
+    # Encuentra el evento con el menor tiempo en el diccionario
+    evento = min(proximoPedido, key=proximoPedido.get)
+    
+    # Devuelve el nombre del evento con el menor tiempo
+    return evento
 
 
 CANTIDAD_COCINEROS = 1
 PRECIO_HAMBURGUESA = 200
 TF = minutos_a_segundos(60*3.5) #simulacion de 3.5 horas
-DIAS_A_SIMULAR = 1 #simulacion de 25 dias 
+DIAS_A_SIMULAR = 10 #simulacion de 25 dias 
 CANTIDAD_FREIDORAS = 2
 CAPACIDAD_PLANCHAS = 8
 
@@ -118,7 +124,7 @@ def main():
         tplp    = intervaloLimpiezaDePlancha()
         while(t < TF):
             proximoPedido = {'Hamburguesa': tpph, 'Ensalada': tppe, 'Papas Fritas': tpppf, 'Limpieza de Plancha': tplp}
-            proximoEvento = proximoEventoTC(proximoPedido)
+            proximoEvento = proximoEvento2(proximoPedido)
             
             if(proximoEvento == "Papas Fritas"):
                 t = tpppf
@@ -132,9 +138,14 @@ def main():
                 t = tppe
                 tppe = intervaloDePedidoEnsalada(np.random.rand()) + t
                 preparacionEnsalada(t)
+            elif(proximoEvento == "Limpieza de Plancha"):
+                t = tplp
+                tplp = t + intervaloLimpiezaDePlancha()
+                preparacionLimpiezaPlancha(t)
         dia = dia + 1
     pepf = sum(stepf) / sum(ntpf)
     peh = steh / nth
+    print(f"peh = {steh} / {nth} = {peh}")
     pee = stee / nte
 
 
@@ -186,7 +197,7 @@ def preparacionHamburguesa(t):
         if t <= tcp[i_plancha]:
             arrepentimiento = arrepentimientoRut(t, tcp[i_plancha])
             if not arrepentimiento:
-                tah = tiempoAtencioHamburguesa(np.random.rand())
+                tah = tiempoAtencionHamburguesa(np.random.rand())
                 stoc = stoc + (tcp[i_plancha] - tcc) 
                 steh = steh + (tcp[i_plancha] - t)
                 tcp[i_plancha] = tcp[i_plancha] + tah
@@ -195,7 +206,7 @@ def preparacionHamburguesa(t):
                 arrep = arrep + 1
                 pass
         else:
-            tah = tiempoAtencioHamburguesa(np.random.rand())
+            tah = tiempoAtencionHamburguesa(np.random.rand())
             stoc = stoc + (t - tcc)
             stop[i_plancha] = stop[i_plancha] + (t - tcp[i_plancha])
             tcp[i_plancha] = t + tah
@@ -204,7 +215,7 @@ def preparacionHamburguesa(t):
         if t <= tcc:
             arrepentimiento = arrepentimientoRut(t, tcp[i_plancha])
             if not arrepentimiento:
-                tah = tiempoAtencioHamburguesa(np.random.rand())
+                tah = tiempoAtencionHamburguesa(np.random.rand())
                 stop[i_plancha] = stop[i_plancha] + (tcc - tcp[i_plancha])
                 steh = steh + (tcc - t)
                 tcp[i_plancha] = tcc + tah
@@ -213,7 +224,7 @@ def preparacionHamburguesa(t):
                 arrep = arrep + 1
                 pass
         else:
-            tah = tiempoAtencioHamburguesa(np.random.rand())
+            tah = tiempoAtencionHamburguesa(np.random.rand())
             stoc = stoc + (t - tcc)
             stop[i_plancha] = stop[i_plancha] + (t - tcp[i_plancha])
             tcp[i_plancha] = t + tah
@@ -226,7 +237,7 @@ def preparacionHamburguesa(t):
         talp = tiempoLimpiezaPlancha(np.random.rand())
         for i in range(0, len(tcp)):
             tcp[i] = tcp[tcp.index(max(tcp))] + talp
-        tplp = tcp[i_plancha] + 30
+        tplp = tcp[i_plancha] + intervaloLimpiezaDePlancha()
         chul = 0
     r = np.random.rand()
     if r <= 0.8: 
@@ -252,8 +263,8 @@ def preparacionLimpiezaPlancha(t):
     
     i_plancha_min = tcp.index(min(tcp))  
     i_plancha_mayor = tcp.index(max(tcp)) 
-    talp = tiempoLimpiezaPlancha()
-    if t <= tcp[i_plancha_min]:
+    talp = tiempoLimpiezaPlancha(np.random.rand())
+    if t <= tcp[i_plancha_mayor]:
         stelp = stelp + (tcp[i_plancha_mayor] - t)
         for i in range(0, len(tcp)):
             tcp[i] = tcp[i_plancha_mayor] + talp
