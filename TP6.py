@@ -1,30 +1,27 @@
 import numpy as np
-from scipy.stats import pearson3
-from scipy.stats import wald
+from scipy.stats import exponnorm
+from scipy.stats import truncpareto
 from scipy.stats import rel_breitwigner
 
 def intervaloDePedidoHamburguesa(p):
-    loc = -60.91163336519913
-    scale = 562.8685676898285
-    #return wald.ppf(p, loc, scale) 
-    return minutos_a_segundos(1*p + 1)
+    a = 4.651616792818317
+    loc = 68.96346392723524
+    scale = 12.76110784225058
+    return exponnorm.ppf(p, a, loc, scale) 
 
 def intervaloDePedidoEnsalada(p):
-    a = 0.5480412546272729
-    loc = -4.6239051501572844e-11
-    scale = 436.9927972206234
-    #return rel_breitwigner.ppf(p, a, loc, scale)
-    return minutos_a_segundos(1*p + 5)
+    return minutos_a_segundos(p*3 +10)
+    
 
 def intervaloDePedidoPapas(p):
-    a = 2.209810337576271
-    loc = 1766.4765414991225
-    scale = 1786.0532859271495
-    #return pearson3.ppf(p, a, loc, scale)
-    return minutos_a_segundos(1*p + 3)
+    a = 22933.735496143887
+    b = 1.0000013411007824
+    loc = -134217740.8463965
+    scale = 134218100.84639648
+    return truncpareto.ppf(0.01 ,a,b,  loc, scale)
 
 def tiempoAtencionHamburguesa(p):
-    return minutos_a_segundos(4*p + 6)
+    return minutos_a_segundos(4*p + 20)
 
 def tiempoAtencionEnsalada(p):
     return minutos_a_segundos(3*p + 4)
@@ -44,15 +41,6 @@ def segundosAMinutos(segundos):
 def intervaloLimpiezaDePlancha():
     return minutos_a_segundos(30)
 
-def proximoEventoTC(proximoPedido):
-    if(proximoPedido['Hamburguesa'] < proximoPedido['Ensalada'] and proximoPedido['Hamburguesa'] < proximoPedido['Papas Fritas']):
-        return ("Hamburguesa")
-    elif(proximoPedido['Ensalada'] < proximoPedido['Hamburguesa'] and proximoPedido['Ensalada'] < proximoPedido['Papas Fritas']):
-        return ("Ensalada")
-    elif(proximoPedido['Papas Fritas'] < proximoPedido['Hamburguesa'] and proximoPedido['Papas Fritas'] < proximoPedido['Ensalada']):
-        return ("Papas Fritas")
-    else:
-        return ("Limpieza de Plancha")
     
 def proximoEvento2(proximoPedido):
     # Encuentra el evento con el menor tiempo en el diccionario
@@ -66,8 +54,8 @@ CANTIDAD_COCINEROS = 1
 PRECIO_HAMBURGUESA = 200
 TF = minutos_a_segundos(60*3.5) #simulacion de 3.5 horas
 DIAS_A_SIMULAR = 10 #simulacion de 25 dias 
-CANTIDAD_FREIDORAS = 2
-CAPACIDAD_PLANCHAS = 8
+CANTIDAD_FREIDORAS = 4
+CAPACIDAD_PLANCHAS = 6
 
 # Tiempos comprometidos (inicializados en 0 para cada estación)
 global tcf, tcp, tcc
@@ -104,8 +92,9 @@ chul = 0
 global tplp
 tplp = 0
 
-# Arrepentimientos
+global flag, arrep
 arrep = 0
+flag = 'Hamburguesa'
 
 def main():
     dia = 0
@@ -189,7 +178,7 @@ def preparacionPapasFritas(t):
     ntpf[i_freidora] += 1  # Incrementar el contador de pedidos atendidos
 
 def preparacionHamburguesa(t):
-    global tcc, stop, steh, stoc, tcp, arrep, nth, stap, stac, chul, tplp
+    global tcc, stop, steh, stoc, tcp, arrep, nth, stap, stac, chul, tplp, flag
 
     i_plancha = tcp.index(min(tcp))  # Seleccionar la plancha con menor TCP
     tah = 0 
@@ -213,16 +202,32 @@ def preparacionHamburguesa(t):
 
     else:
         if t <= tcc:
-            arrepentimiento = arrepentimientoRut(t, tcp[i_plancha])
-            if not arrepentimiento:
-                tah = tiempoAtencionHamburguesa(np.random.rand())
-                stop[i_plancha] = stop[i_plancha] + (tcc - tcp[i_plancha])
-                steh = steh + (tcc - t)
-                tcp[i_plancha] = tcc + tah
-                tcc = tcc + tah
+            if flag == 'Ensalada':       
+                arrepentimiento = arrepentimientoRut(t, tcc)
+                if not arrepentimiento:
+                    tah = tiempoAtencionHamburguesa(np.random.rand())
+                    stop[i_plancha] = stop[i_plancha] + (tcc - tcp[i_plancha])
+                    steh = steh + (tcc - t)
+                    tcp[i_plancha] = tcc + tah
+                    tcc = tcc + tah
+                else:
+                    arrep = arrep + 1
+                    pass
             else:
-                arrep = arrep + 1
-                pass
+                tah = tiempoAtencionHamburguesa(np.random.rand())
+                if t <= tcp[i_plancha]:
+                    arrepentimiento = arrepentimientoRut(t, tcp[i_plancha])
+                    if not arrepentimiento:
+                        steh = steh + (tcp[i_plancha] - t)
+                        tcp[i_plancha] = tcp[i_plancha] + tah
+                        tcc = tcp[i_plancha] + tah
+                    else:
+                        arrep = arrep + 1
+                        pass
+                else:  
+                    stop[i_plancha] = stop[i_plancha] + (t - tcp[i_plancha])
+                    tcp[i_plancha] = t + tah
+                    tcc = t + tah
         else:
             tah = tiempoAtencionHamburguesa(np.random.rand())
             stoc = stoc + (t - tcc)
@@ -233,6 +238,7 @@ def preparacionHamburguesa(t):
     stap[i_plancha] = stap[i_plancha] + tah
     nth = nth + 1  
     chul = chul + 1
+    flag = 'Hamburguesa'
     if chul >= 50:
         talp = tiempoLimpiezaPlancha(np.random.rand())
         for i in range(0, len(tcp)):
@@ -257,11 +263,11 @@ def preparacionEnsalada(t):
         tcc = t + tae
     stac = stac + tae
     nte = nte + 1  
+    flag = 'Ensalada'
 
 def preparacionLimpiezaPlancha(t):
     global tcp, stelp, stop, chul
-    
-    i_plancha_min = tcp.index(min(tcp))  
+
     i_plancha_mayor = tcp.index(max(tcp)) 
     talp = tiempoLimpiezaPlancha(np.random.rand())
     if t <= tcp[i_plancha_mayor]:
@@ -276,17 +282,17 @@ def preparacionLimpiezaPlancha(t):
 
 def arrepentimientoRut(t, tc):
     espera = tc - t
-    if espera <= 10:
+    if espera <= minutos_a_segundos(10):
         return False
     else:
-        if espera <= 20:
+        if espera <= minutos_a_segundos(20):
             r = np.random.rand()
             if r <= 0.7:
                 return False
             else:
                 return True
         else:
-            if espera <= 40:
+            if espera <= minutos_a_segundos(40):
                 r = np.random.rand()
                 if r <= 0.2:
                     return False
