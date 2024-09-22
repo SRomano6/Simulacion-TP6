@@ -35,6 +35,9 @@ def tiempoLimpiezaPlancha(p):
 def minutos_a_segundos(minutos):
     return minutos * 60
 
+def segundosAMinutos(segundos):
+    return segundos / 60
+
 def intervaloLimpiezaDePlancha():
     return minutos_a_segundos(30)
 
@@ -50,26 +53,23 @@ def proximoEventoTC(proximoPedido):
 
 
 
-TIEMPO_ENTRE_LIMPIEZA_DE_PLANCHAS = minutos_a_segundos(15)
-CANTIDAD_COCINEROS = 2
-CAPACIDAD_PLANCHAS = 2
+CANTIDAD_COCINEROS = 1
 PRECIO_HAMBURGUESA = 200
 TF = minutos_a_segundos(60*3.5) #simulacion de 3.5 horas
 DIAS_A_SIMULAR = 1 #simulacion de 25 dias 
-
-
-# Inicializa las listas de tiempos comprometidos con el número de recursos disponibles.
 CANTIDAD_FREIDORAS = 2
-CANTIDAD_PLANCHAS = 2
+CAPACIDAD_PLANCHAS = 2
 
 # Tiempos comprometidos (inicializados en 0 para cada estación)
+global tcf, tcp, tcc
 tcf = [0] * CANTIDAD_FREIDORAS  # Tiempo Comprometido Freidoras (una lista de ceros del tamaño de las freidoras)
-tcp = [0] * CANTIDAD_PLANCHAS  # Tiempo Comprometido Planchas (una lista de ceros del tamaño de las planchas)
+tcp = [0] * CAPACIDAD_PLANCHAS  # Tiempo Comprometido Planchas (una lista de ceros del tamaño de las planchas)
 tcc = 0  # Tiempo Comprometido Cocineros (solo un cocinero)
 
 # Tiempos ociosos y de espera acumulados
+global stof, stop, stoe, stoc, stepf, steh, stee
 stof = [0] * CANTIDAD_FREIDORAS  # Tiempo Ocioso Freidoras
-stop = [0] * CANTIDAD_PLANCHAS   # Tiempo Ocioso Planchas
+stop = [0] * CAPACIDAD_PLANCHAS   # Tiempo Ocioso Planchas
 stoe = 0   # Tiempo Ocioso Estación Ensaladas (solo una estación de ensaladas)
 stoc = 0   # Tiempo Ocioso Cocineros (un cocinero)
 stepf = [0] * CANTIDAD_FREIDORAS  # Tiempo de Espera Papas Fritas
@@ -77,16 +77,19 @@ steh = 0  # Tiempo de Espera Hamburguesas
 stee = 0  # Tiempo de Espera Ensaladas
 
 # Contadores de pedidos atendidos
+global ntpf, nth, nte
 ntpf = [0] * CANTIDAD_FREIDORAS  # Número total de pedidos de papas fritas atendidos por freidora
 nth = 0  # Número total de pedidos de hamburguesas atendidos
 nte = 0  # Número total de pedidos de ensaladas atendidos
 
 # Sumatorias
+global stapf, stap, stae, stac, stelp, chul
 stapf = [0] * CANTIDAD_FREIDORAS
-stap = [0] * CANTIDAD_PLANCHAS
+stap = [0] * CAPACIDAD_PLANCHAS
 stae = 0
 stac = 0
 stelp = 0
+chul = 0
 
 # Arrepentimientos
 arrep = 0
@@ -120,9 +123,12 @@ def main():
     peh = steh / nth
     pee = stee / nte
 
-    ptoc = []
-    for i in range(0, len(stoc)):
-        ptoc.append((stoc[i]*100) / stoc[i] + stac[i])
+
+    ptoc = (stoc*100) / stoc + stac
+
+    #ptoc = []
+    #for i in range(0, len(stoc)):
+    #    ptoc.append((stoc[i]*100) / stoc[i] + stac[i])
     
     ptop = []
     for i in range(0, len(stop)):
@@ -132,9 +138,9 @@ def main():
     for i in range(0, len(stof)):
         ptof.append((stof[i]*100) / stof[i] + stapf[i])
 
-    print("Promedio de espera de papas fritas: ", pepf)
-    print("Promedio de espera de hamburguesas: ", peh)
-    print("Promedio de espera de ensaladas: ", pee)
+    print("Promedio de espera de papas fritas: ", segundosAMinutos(pepf))
+    print("Promedio de espera de hamburguesas: ", segundosAMinutos(peh))
+    print("Promedio de espera de ensaladas: ", segundosAMinutos(pee))
     print("Porcentaje de tiempo ocioso de cocineros: ", ptoc)
     print("Porcentaje de tiempo ocioso de planchas: ", ptop)
     print("Porcentaje de tiempo ocioso de freidoras: ", ptof)
@@ -144,6 +150,8 @@ def main():
 
 
 def preparacionPapasFritas(t):
+    global tcf, stepf, stof, stapf, ntpf  
+    
     i_freidora = tcf.index(min(tcf))  # Seleccionar la freidora con menor TCF
     tapf  = tiempoAtencionPapasFritas(np.random.rand())
     if t <= tcf[i_freidora]:  # Freidora ocupada
@@ -155,14 +163,15 @@ def preparacionPapasFritas(t):
     stapf[i_freidora] += tapf
     ntpf[i_freidora] += 1  # Incrementar el contador de pedidos atendidos
 
-
 def preparacionHamburguesa(t):
+    global tcc, stop, steh, stoc, tcp, arrep, nth, stap, stac, chul
+
     i_plancha = tcp.index(min(tcp))  # Seleccionar la plancha con menor TCP
     tah = tiempoAtencioHamburguesa(np.random.rand())
-    
+
     if tcp[i_plancha] > tcc:
         if t <= tcp[i_plancha]:
-            arrepentimiento = arrepentimientoRut()
+            arrepentimiento = arrepentimientoRut(t, tcp[i_plancha])
             if not arrepentimiento:
                 tah = tiempoAtencioHamburguesa(np.random.rand())
                 stoc = stoc + (tcp[i_plancha] - tcc) 
@@ -180,7 +189,7 @@ def preparacionHamburguesa(t):
 
     else:
         if t <= tcc:
-            arrepentimiento = arrepentimientoRut()
+            arrepentimiento = arrepentimientoRut(t, tcp[i_plancha])
             if not arrepentimiento:
                 tah = tiempoAtencioHamburguesa(np.random.rand())
                 stop[i_plancha] = stop[i_plancha] + (tcc - tcp[i_plancha])
@@ -201,7 +210,7 @@ def preparacionHamburguesa(t):
     nth = nth + 1  
     chul = chul + 1
     if chul >= 50:
-        talp = tiempoLimpiezaPlancha(np.random.rand()) #cambiar
+        talp = tiempoLimpiezaPlancha(np.random.rand())
         for i in range(0, len(tcp)):
             tcp[i] = tcp[i] + talp
         talp = tcp + 30
@@ -213,6 +222,8 @@ def preparacionHamburguesa(t):
         preparacionEnsalada(t)
 
 def preparacionEnsalada(t):
+    global tcc, stee, stac, nte, stoc
+
     tae = tiempoAtencionEnsalada(np.random.rand())
     if t <= tcc:
         stee = stee + (tcc - t)
@@ -224,6 +235,8 @@ def preparacionEnsalada(t):
     nte = nte + 1  
 
 def preparacionLimpiezaPlancha(t):
+    global tcp, stelp, stop
+    
     i_plancha = tcp.index(min(tcp))  
     talp = intervaloLimpiezaDePlancha()
     if t <= tcp[i_plancha]:
