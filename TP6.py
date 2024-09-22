@@ -58,7 +58,7 @@ PRECIO_HAMBURGUESA = 200
 TF = minutos_a_segundos(60*3.5) #simulacion de 3.5 horas
 DIAS_A_SIMULAR = 10 #simulacion de 25 dias 
 CANTIDAD_FREIDORAS = 2
-CAPACIDAD_PLANCHAS = 2
+CAPACIDAD_PLANCHAS = 8
 
 # Tiempos comprometidos (inicializados en 0 para cada estación)
 global tcf, tcp, tcc
@@ -178,7 +178,7 @@ def preparacionHamburguesa(t):
     global tcc, stop, steh, stoc, tcp, arrep, nth, stap, stac, chul, tplp
 
     i_plancha = tcp.index(min(tcp))  # Seleccionar la plancha con menor TCP
-
+    tah = 0 
     if tcp[i_plancha] > tcc:
         if t <= tcp[i_plancha]:
             arrepentimiento = arrepentimientoRut(t, tcp[i_plancha])
@@ -210,7 +210,7 @@ def preparacionHamburguesa(t):
                 arrep = arrep + 1
                 pass
         else:
-            tiempoAtencioHamburguesa(np.random.rand())
+            tah = tiempoAtencioHamburguesa(np.random.rand())
             stoc = stoc + (t - tcc)
             stop[i_plancha] = stop[i_plancha] + (t - tcp[i_plancha])
             tcp[i_plancha] = t + tah
