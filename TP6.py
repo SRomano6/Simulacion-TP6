@@ -6,19 +6,22 @@ from scipy.stats import rel_breitwigner
 def intervaloDePedidoHamburguesa(p):
     loc = -60.91163336519913
     scale = 562.8685676898285
-    return wald.ppf(p, loc, scale) 
+    #return wald.ppf(p, loc, scale) 
+    return minutos_a_segundos(0.1*p + 0.1)
 
 def intervaloDePedidoEnsalada(p):
     a = 0.5480412546272729
     loc = -4.6239051501572844e-11
     scale = 436.9927972206234
-    return rel_breitwigner.ppf(p, a, loc, scale)
+    #return rel_breitwigner.ppf(p, a, loc, scale)
+    return minutos_a_segundos(1*p + 5)
 
 def intervaloDePedidoPapas(p):
     a = 2.209810337576271
     loc = 1766.4765414991225
     scale = 1786.0532859271495
-    return pearson3.ppf(p, a, loc, scale)
+    #return pearson3.ppf(p, a, loc, scale)
+    return minutos_a_segundos(1*p + 3)
 
 def tiempoAtencioHamburguesa(p):
     return minutos_a_segundos(4*p + 6)
@@ -27,7 +30,7 @@ def tiempoAtencionEnsalada(p):
     return minutos_a_segundos(3*p + 4)
 
 def tiempoAtencionPapasFritas(p):
-    return minutos_a_segundos(5*p + 10)
+    return minutos_a_segundos(3*p + 8)
 
 def tiempoLimpiezaPlancha(p):
     return minutos_a_segundos(5*p + 5)
@@ -56,7 +59,7 @@ def proximoEventoTC(proximoPedido):
 CANTIDAD_COCINEROS = 1
 PRECIO_HAMBURGUESA = 200
 TF = minutos_a_segundos(60*3.5) #simulacion de 3.5 horas
-DIAS_A_SIMULAR = 10 #simulacion de 25 dias 
+DIAS_A_SIMULAR = 1 #simulacion de 25 dias 
 CANTIDAD_FREIDORAS = 2
 CAPACIDAD_PLANCHAS = 8
 
@@ -192,9 +195,9 @@ def preparacionHamburguesa(t):
                 arrep = arrep + 1
                 pass
         else:
-            tiempoAtencioHamburguesa(np.random.rand())
+            tah = tiempoAtencioHamburguesa(np.random.rand())
             stoc = stoc + (t - tcc)
-            stop = stop + (t - tcp[i_plancha])
+            stop[i_plancha] = stop[i_plancha] + (t - tcp[i_plancha])
             tcp[i_plancha] = t + tah
 
     else:
