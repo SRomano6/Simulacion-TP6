@@ -55,31 +55,35 @@ CANTIDAD_COCINEROS = 2
 CAPACIDAD_PLANCHAS = 2
 PRECIO_HAMBURGUESA = 200
 TF = minutos_a_segundos(60*3.5) #simulacion de 3.5 horas
-DIAS_A_SIMULAR = 25 #simulacion de 25 dias 
+DIAS_A_SIMULAR = 1 #simulacion de 25 dias 
+
+
+# Inicializa las listas de tiempos comprometidos con el número de recursos disponibles.
+CANTIDAD_FREIDORAS = 2
+CANTIDAD_PLANCHAS = 2
 
 # Tiempos comprometidos (inicializados en 0 para cada estación)
-tcf = []  # Tiempo Comprometido Freidoras
-tcp = []  # Tiempo Comprometido Planchas
-tcc = 0  # Tiempo Comprometido Cocineros
+tcf = [0] * CANTIDAD_FREIDORAS  # Tiempo Comprometido Freidoras (una lista de ceros del tamaño de las freidoras)
+tcp = [0] * CANTIDAD_PLANCHAS  # Tiempo Comprometido Planchas (una lista de ceros del tamaño de las planchas)
+tcc = 0  # Tiempo Comprometido Cocineros (solo un cocinero)
 
 # Tiempos ociosos y de espera acumulados
-stof = []  # Tiempo Ocioso Freidoras
-stoh = []  # Tiempo Ocioso Planchas
-stoe = []  # Tiempo Ocioso Estación Ensaladas
-stoc = 0    # Tiempo Ocioso Cocineros
-stop = []
-stepf = []  # Tiempo de Espera Papas Fritas
-steh = []  # Tiempo de Espera Hamburguesas
-stee = []  # Tiempo de Espera Ensaladas
+stof = [0] * CANTIDAD_FREIDORAS  # Tiempo Ocioso Freidoras
+stop = [0] * CANTIDAD_PLANCHAS   # Tiempo Ocioso Planchas
+stoe = 0   # Tiempo Ocioso Estación Ensaladas (solo una estación de ensaladas)
+stoc = 0   # Tiempo Ocioso Cocineros (un cocinero)
+stepf = [0] * CANTIDAD_FREIDORAS  # Tiempo de Espera Papas Fritas
+steh = 0  # Tiempo de Espera Hamburguesas
+stee = 0  # Tiempo de Espera Ensaladas
 
 # Contadores de pedidos atendidos
-ntpf = []  # Número total de pedidos de papas fritas atendidos
-nth = 0   # Número total de pedidos de hamburguesas atendidos
-nte = 0   # Número total de pedidos de ensaladas atendidos
+ntpf = [0] * CANTIDAD_FREIDORAS  # Número total de pedidos de papas fritas atendidos por freidora
+nth = 0  # Número total de pedidos de hamburguesas atendidos
+nte = 0  # Número total de pedidos de ensaladas atendidos
 
 # Sumatorias
-stapf = 0
-stap = []
+stapf = [0] * CANTIDAD_FREIDORAS
+stap = [0] * CANTIDAD_PLANCHAS
 stae = 0
 stac = 0
 stelp = 0
@@ -89,7 +93,7 @@ arrep = 0
 
 def main():
     dia = 0
-    while(DIAS_A_SIMULAR < dia):
+    while(DIAS_A_SIMULAR > dia):
         t = 0
         tpppf   = intervaloDePedidoPapas(np.random.rand()) 
         tpph    = intervaloDePedidoHamburguesa(np.random.rand()) 
@@ -111,7 +115,8 @@ def main():
                 t = tppe
                 tppe = intervaloDePedidoEnsalada(np.random.rand()) + t
                 preparacionEnsalada(t)
-    pepf = stepf / ntpf
+        dia = dia + 1
+    pepf = sum(stepf) / sum(ntpf)
     peh = steh / nth
     pee = stee / nte
 
@@ -250,3 +255,5 @@ def arrepentimientoRut(t, tc):
             else: 
                 return True
         
+if __name__ == "__main__":
+    main()
