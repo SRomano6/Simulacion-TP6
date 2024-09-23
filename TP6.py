@@ -18,7 +18,7 @@ def intervaloDePedidoPapas(p):
     b = 1.0000013411007824
     loc = -134217740.8463965
     scale = 134218100.84639648
-    return truncpareto.ppf(0.01 ,a,b,  loc, scale)
+    return truncpareto.ppf(p ,a,b,  loc, scale)
 
 def tiempoAtencionHamburguesa(p):
     return minutos_a_segundos(4*p + 20)
@@ -54,7 +54,7 @@ CANTIDAD_COCINEROS = 1
 PRECIO_HAMBURGUESA = 200
 TF = minutos_a_segundos(60*3.5) #simulacion de 3.5 horas
 DIAS_A_SIMULAR = 10 #simulacion de 25 dias 
-CANTIDAD_FREIDORAS = 4
+CANTIDAD_FREIDORAS = 2
 CAPACIDAD_PLANCHAS = 6
 
 # Tiempos comprometidos (inicializados en 0 para cada estación)
@@ -98,8 +98,9 @@ flag = 'Hamburguesa'
 
 def main():
     dia = 0
+    n = 0
     while(DIAS_A_SIMULAR > dia):
-        global tcf, tcp, tcc, chul
+        global tcf, tcp, tcc, chul, arrep
 
         tcf = [0] * CANTIDAD_FREIDORAS
         tcp = [0] * CAPACIDAD_PLANCHAS
@@ -112,6 +113,7 @@ def main():
         tppe    = intervaloDePedidoEnsalada(np.random.rand()) 
         tplp    = intervaloLimpiezaDePlancha()
         while(t < TF):
+            n = n + 1
             proximoPedido = {'Hamburguesa': tpph, 'Ensalada': tppe, 'Papas Fritas': tpppf, 'Limpieza de Plancha': tplp}
             proximoEvento = proximoEvento2(proximoPedido)
             
@@ -158,7 +160,9 @@ def main():
     print("Porcentaje de tiempo ocioso de cocineros: ", ptoc)
     print("Porcentaje de tiempo ocioso de planchas: ", ptop)
     print("Porcentaje de tiempo ocioso de freidoras: ", ptof)
-    print("Cantidad de arrepentimientos: ", arrep)
+    print("Cantidad de arrepentimientos mas de 40 minutos: ", contador40)
+    print("Cantidad de arrepentimientos mas de 20 minutos: ", contador20)
+    print(contador20 + contador40 + nth)
 
 
 
@@ -212,7 +216,7 @@ def preparacionHamburguesa(t):
                     tcc = tcc + tah
                 else:
                     arrep = arrep + 1
-                    pass
+                    return
             else:
                 tah = tiempoAtencionHamburguesa(np.random.rand())
                 if t <= tcp[i_plancha]:
@@ -223,7 +227,7 @@ def preparacionHamburguesa(t):
                         tcc = tcp[i_plancha] + tah
                     else:
                         arrep = arrep + 1
-                        pass
+                        return
                 else:  
                     stop[i_plancha] = stop[i_plancha] + (t - tcp[i_plancha])
                     tcp[i_plancha] = t + tah
@@ -252,7 +256,7 @@ def preparacionHamburguesa(t):
         preparacionEnsalada(t)
 
 def preparacionEnsalada(t):
-    global tcc, stee, stac, nte, stoc
+    global tcc, stee, stac, nte, stoc, flag
 
     tae = tiempoAtencionEnsalada(np.random.rand())
     if t <= tcc:
@@ -280,7 +284,11 @@ def preparacionLimpiezaPlancha(t):
             tcp[i] = t + talp
     chul = 0
 
+global contador20, contador40
+contador20 = 0
+contador40 = 0
 def arrepentimientoRut(t, tc):
+    global contador20, contador40
     espera = tc - t
     if espera <= minutos_a_segundos(10):
         return False
@@ -290,6 +298,7 @@ def arrepentimientoRut(t, tc):
             if r <= 0.7:
                 return False
             else:
+                contador20 = contador20 + 1
                 return True
         else:
             if espera <= minutos_a_segundos(40):
@@ -297,6 +306,7 @@ def arrepentimientoRut(t, tc):
                 if r <= 0.2:
                     return False
                 else:
+                    contador40 = contador40 + 1
                     return True
             else: 
                 return True
