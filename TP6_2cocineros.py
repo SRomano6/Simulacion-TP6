@@ -7,10 +7,14 @@ def intervaloDePedidoHamburguesa(p):
     a = 4.651616792818317
     loc = 68.96346392723524
     scale = 12.76110784225058
-    return exponnorm.ppf(p, a, loc, scale) 
+
+    # Elasticidad no lineal: cuanto mayor sea el precio, más aumenta el intervalo de manera exponencial
+    factor_precio = np.exp((PRECIO_DE_HAMBURGUESAS - PRECIO_BASE) / PRECIO_BASE)
+
+    return exponnorm.ppf(p, a, loc, scale) * factor_precio
 
 def intervaloDePedidoEnsalada(p):
-    return minutos_a_segundos(p*3 +10)
+    return minutos_a_segundos(p*3 + 30)
     
 
 def intervaloDePedidoPapas(p):
@@ -21,13 +25,13 @@ def intervaloDePedidoPapas(p):
     return truncpareto.ppf(p ,a,b,  loc, scale)
 
 def tiempoAtencionHamburguesa(p):
-    return minutos_a_segundos(4*p + 10)
+    return minutos_a_segundos(4*p + 8)
 
 def tiempoAtencionEnsalada(p):
-    return minutos_a_segundos(3*p + 4)
+    return minutos_a_segundos(3*p + 8)
 
 def tiempoAtencionPapasFritas(p):
-    return minutos_a_segundos(3*p + 8)
+    return minutos_a_segundos(3*p + 7)
 
 def tiempoLimpiezaPlancha(p):
     return minutos_a_segundos(5*p + 5)
@@ -51,11 +55,12 @@ def proximoEvento2(proximoPedido):
 
 
 CANTIDAD_COCINEROS = 2
-PRECIO_HAMBURGUESA = 12000
+PRECIO_DE_HAMBURGUESAS = 13000
+PRECIO_BASE = 10000
 TF = minutos_a_segundos(60*3.5) #simulacion de 3.5 horas
-DIAS_A_SIMULAR = 16 #simulacion de 25 dias 
-CANTIDAD_FREIDORAS = 2
-CAPACIDAD_PLANCHAS = 16
+DIAS_A_SIMULAR = 30 #simulacion de 25 dias 
+CANTIDAD_FREIDORAS = 3
+CAPACIDAD_PLANCHAS = 6
 
 # Tiempos comprometidos (inicializados en 0 para cada estac1ión)
 global tcf, tcp, tcc1
@@ -83,8 +88,8 @@ nte = 0  # Número total de pedidos de ensaladas atendidos
 
 # Sumatorias
 global stapf, stap, stae, stac1, stelp, chul
-stapf = [0] * CANTIDAD_FREIDORAS
-stap = [0] * CAPACIDAD_PLANCHAS
+stapf = [1] * CANTIDAD_FREIDORAS
+stap = [1] * CAPACIDAD_PLANCHAS
 stae = 0
 stac1 = 0
 stac2 = 0
@@ -208,7 +213,7 @@ def main():
     print(f"Porcentaje de arrepentimientos entre 20 y 40 minutos: {(contador40 * 100) / cantidad_pedidos_hamburugesa:.2f}%")
     print(f"Porcentaje de arrepentimientos mas de 40 minutos: {(contadorMas40 * 100) / cantidad_pedidos_hamburugesa:.2f}%")
     print(f"Porcentaje de pedidos de Hamburguesas que Hicimos: {(nth * 100) / cantidad_pedidos_hamburugesa:.2f}%")
-    print(f"Ganancias con Hamburguesas: ${nth * PRECIO_HAMBURGUESA:,.0f}")
+    print(f"Ganancias con Hamburguesas: ${nth * 12000:,.0f}")
     print(f"Ganancias con Papas Fritas: ${(sum(ntpf) - (nth*0.8)) * 7000:,.0f}")
 
 
@@ -370,7 +375,7 @@ def arrepentimientoRutPF(t, tc):
         else:
             if espera <= minutos_a_segundos(40):
                 r = np.random.rand()
-                if r <= 0.2:
+                if r <= 0.5:
                     return False
                 else:
                     contadorArrepPF40 = contadorArrepPF40 + 1
