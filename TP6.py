@@ -25,7 +25,7 @@ def intervaloDePedidoPapas(p):
     return truncpareto.ppf(p ,a,b,  loc, scale)
 
 def tiempoAtencionHamburguesa(p):
-    return minutos_a_segundos(4*p + 20)
+    return minutos_a_segundos(4*p + 10)
 
 def tiempoAtencionEnsalada(p):
     return minutos_a_segundos(3*p + 4)
@@ -58,9 +58,9 @@ CANTIDAD_COCINEROS = 1
 PRECIO_DE_HAMBURGUESAS = 12000
 PRECIO_BASE = 10000
 TF = minutos_a_segundos(60*3.5) #simulacion de 3.5 horas
-DIAS_A_SIMULAR = 10 #simulacion de 25 dias 
+DIAS_A_SIMULAR = 16 #simulacion de 25 dias 
 CANTIDAD_FREIDORAS = 2
-CAPACIDAD_PLANCHAS = 6
+CAPACIDAD_PLANCHAS = 8
 
 # Tiempos comprometidos (inicializados en 0 para cada estación)
 global tcf, tcp, tcc
@@ -98,14 +98,16 @@ chul = 0
 global tplp
 tplp = 0
 
-global flag, arrep
+global flag, arrep, arrepPF
 arrep = 0
+arrepPF = 0
 flag = 'Hamburguesa'
 
 def main():
     dia = 0
     n = 0
     cantidad_pedidos_hamburugesa = 0
+    cantidad_pedidos_papas = 0
     while(DIAS_A_SIMULAR > dia):
         global tcf, tcp, tcc, chul, arrep
 
@@ -125,6 +127,7 @@ def main():
             proximoEvento = proximoEvento2(proximoPedido)
             
             if(proximoEvento == "Papas Fritas"):
+                cantidad_pedidos_papas = cantidad_pedidos_papas + 1
                 t = tpppf
                 tpppf = intervaloDePedidoPapas(np.random.rand()) + t
                 preparacionPapasFritas(t)
@@ -142,13 +145,13 @@ def main():
                 tplp = t + intervaloLimpiezaDePlancha()
                 preparacionLimpiezaPlancha(t)
         dia = dia + 1
-    pepf = sum(stepf) / sum(ntpf)
-    peh = steh / nth
+    pepf = float(sum(stepf) / sum(ntpf))
+    peh = float(steh / nth)
     print(f"peh = {steh} / {nth} = {peh}")
-    pee = stee / nte
+    pee = float(stee / nte)
 
 
-    ptoc = (stoc*100) / (stoc + stac)
+    ptoc = float(stoc*100) / (stoc + stac)
 
     #ptoc = []
     #for i in range(0, len(stoc)):
@@ -156,41 +159,79 @@ def main():
     
     ptop = []
     for i in range(0, len(stop)):
-        ptop.append((stop[i]*100) / (stop[i] + stap[i]))
+        ptop.append(float((stop[i]*100) / (stop[i] + stap[i])))
+
+
+    ptop2 = []
+    for i in range(len(stop)):
+        ptop2.append((stop[i] * 100) / (stop[i] + stap[i]))
+
+    # Crear una lista de porcentajes formateados
+    porcentajes_formateados = [f"{porcentaje:.2f}%" for porcentaje in ptop2]
+
+    # Unir los porcentajes con comas y mostrarlos entre corchetes
+    print(f"Porcentaje de tiempo ocioso de planchas: [{', '.join(porcentajes_formateados)}]")
+
+
+
+
+
 
     ptof = []
     for i in range(0, len(stof)):
-        ptof.append((stof[i]*100) / (stof[i] + stapf[i]))
+        ptof.append(float((stof[i]*100) / (stof[i] + stapf[i])))
+
+    ptof2 = []
+    for i in range(0, len(stof)):
+        ptof2.append((stof[i]*100) / (stof[i] + stapf[i]))
+    
+    # Crear una lista de porcentajes formateados
+    porcentajes_formateados2 = [f"{porcentaje:.2f}%" for porcentaje in ptof2]
+
+    # Unir los porcentajes con comas y mostrarlos entre corchetes
+    print(f"Porcentaje de tiempo ocioso de Freidoras: [{', '.join(porcentajes_formateados2)}]")
 
     print("Promedio de espera de papas fritas: ", segundosAMinutos(pepf))
     print("Promedio de espera de hamburguesas: ", segundosAMinutos(peh))
     print("Promedio de espera de ensaladas: ", segundosAMinutos(pee))
-    print("Porcentaje de tiempo ocioso de cocineros: ", ptoc)
-    print("Porcentaje de tiempo ocioso de planchas: ", ptop)
-    print("Porcentaje de tiempo ocioso de freidoras: ", ptof)
+    print(f"Porcentaje de tiempo ocioso de cocinero: {ptoc:.2f}%")
     print("Cantidad de arrepentimientos entre 10 y 20 minutos: ", contador20)
     print("Cantidad de arrepentimientos entre 20 y 40 minutos: ", contador40)
     print("Cantidad de arrepentimientos mas de 40 minutos: ", contadorMas40)
-    print("cantidad hamburguesas:", contador20 + contador40 + contadorMas40 + nth)
-    print("n: ", n)
-    print("nth: ", nth)
-    print("Porcentaje de arrepentimientos entre 10 y 20 minutos: ", (contador20 * 100) / cantidad_pedidos_hamburugesa)
-    print("Porcentaje de arrepentimientos entre 20 y 40 minutos: ", (contador40 * 100) / cantidad_pedidos_hamburugesa)
-    print("Porcentaje de arrepentimientos mas de 40 minutos: ", (contadorMas40 * 100) / cantidad_pedidos_hamburugesa)
-    print("Porcentaje de pedidos de Hamburguesas que Hicimos: ", (nth * 100) / cantidad_pedidos_hamburugesa)
+    print("Cantidad total de pedidos: ", n)
+    print("cantidad pedidos de hamburguesas:", contador20 + contador40 + contadorMas40 + nth)
+    print("Cantidad de Hamburguesas hechas: ", nth)
+    print(f"Porcentaje de arrepentimientos entre 10 y 20 minutos:  {(contador20 * 100) / cantidad_pedidos_hamburugesa:.2f}%")
+    print(f"Porcentaje de arrepentimientos entre 20 y 40 minutos: {(contador40 * 100) / cantidad_pedidos_hamburugesa:.2f}%")
+    print(f"Porcentaje de arrepentimientos mas de 40 minutos: {(contadorMas40 * 100) / cantidad_pedidos_hamburugesa:.2f}%")
+    print(f"Porcentaje de pedidos de Hamburguesas que Hicimos: {(nth * 100) / cantidad_pedidos_hamburugesa:.2f}%")
+    print(f"Ganancias con Hamburguesas: ${nth * PRECIO_DE_HAMBURGUESAS:,.0f}")
+    print(f"Ganancias con Papas Fritas: ${(sum(ntpf) - (nth*0.8)) * 7000:,.0f}")
+
+
+
+    #print(f"Porcentaje de arrepentimientos PF entre 10 y 20 minutos:  {(contadorArrepPF20 * 100) / cantidad_pedidos_papas:.2f}%")
+    #print(f"Porcentaje de arrepentimientos PF entre 20 y 40 minutos: {(contadorArrepPF40 * 100) / cantidad_pedidos_papas:.2f}%")
+    #print(f"Porcentaje de arrepentimientos PF mas de 40 minutos: {(contadorArrepPFMas40 * 100) / cantidad_pedidos_papas:.2f}%")
     
 
 def preparacionPapasFritas(t):
-    global tcf, stepf, stof, stapf, ntpf  
+    global tcf, stepf, stof, stapf, ntpf, arrepPF  
     
     i_freidora = tcf.index(min(tcf))  # Seleccionar la freidora con menor TCF
+
+    #arrepentimiento = arrepentimientoRutPF(t, tcf[i_freidora])
+    #if not arrepentimiento:
     tapf  = tiempoAtencionPapasFritas(np.random.rand())
     if t <= tcf[i_freidora]:  # Freidora ocupada
         stepf[i_freidora] += (tcf[i_freidora] - t)  # Sumar al acumulador de espera
         tcf[i_freidora] += tapf  # Actualizar el tiempo comprometido
     else:  # Freidora disponible
         stof[i_freidora] += (t - tcf[i_freidora])  # Sumar al tiempo ocioso
-        tcf[i_freidora] = t + tapf  # Actualizar el tiempo comprometido 
+        tcf[i_freidora] = t + tapf  # Actualizar el tiempo comprometido
+    #else:
+    #    arrepPF = arrepPF + 1
+    #    return 
     stapf[i_freidora] += tapf
     ntpf[i_freidora] += 1  # Incrementar el contador de pedidos atendidos
 
@@ -326,6 +367,34 @@ def arrepentimientoRut(t, tc):
                     return True
             else:
                 contadorMas40 = contadorMas40 + 1 
+                return True
+global contadorArrepPF20, contadorArrepPF40, contadorArrepPFMas40
+contadorArrepPF20 = 0
+contadorArrepPF40 = 0
+contadorArrepPFMas40 = 0
+def arrepentimientoRutPF(t, tc):
+    global contadorArrepPF20, contadorArrepPF40, contadorArrepPFMas40
+    espera = tc - t
+    if espera <= minutos_a_segundos(10):
+        return False
+    else:
+        if espera <= minutos_a_segundos(20):
+            r = np.random.rand()
+            if r <= 0.7:
+                return False
+            else:
+                contadorArrepPF20 = contadorArrepPF20 + 1
+                return True
+        else:
+            if espera <= minutos_a_segundos(40):
+                r = np.random.rand()
+                if r <= 0.2:
+                    return False
+                else:
+                    contadorArrepPF40 = contadorArrepPF40 + 1
+                    return True
+            else:
+                contadorArrepPFMas40 = contadorArrepPFMas40 + 1 
                 return True
         
 if __name__ == "__main__":
