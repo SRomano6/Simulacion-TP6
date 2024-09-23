@@ -259,6 +259,7 @@ def preparacionHamburguesa(t):
             stoc = stoc + (t - tcc)
             stop[i_plancha] = stop[i_plancha] + (t - tcp[i_plancha])
             tcp[i_plancha] = t + tah
+            tcc = t + tah
 
     else:
         if t <= tcc:
@@ -293,6 +294,7 @@ def preparacionHamburguesa(t):
             stoc = stoc + (t - tcc)
             stop[i_plancha] = stop[i_plancha] + (t - tcp[i_plancha])
             tcp[i_plancha] = t + tah
+            tcc = t + tah
 
     stac = stac + tah
     stap[i_plancha] = stap[i_plancha] + tah
