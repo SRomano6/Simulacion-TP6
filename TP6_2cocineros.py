@@ -3,7 +3,7 @@ from scipy.stats import exponnorm
 from scipy.stats import truncpareto
 from scipy.stats import rel_breitwigner
 
-def intervaloDePedidoHamburguesa(p):
+def intervaloDePedidoHamburguesa2(p):
     a = 4.651616792818317
     loc = 68.96346392723524
     scale = 12.76110784225058
@@ -12,6 +12,9 @@ def intervaloDePedidoHamburguesa(p):
     factor_precio = np.exp((PRECIO_DE_HAMBURGUESAS - PRECIO_BASE) / PRECIO_BASE)
 
     return exponnorm.ppf(p, a, loc, scale) * factor_precio
+
+def intervaloDePedidoHamburguesa(p):
+    return minutos_a_segundos(p*1 + 7)
 
 def intervaloDePedidoEnsalada(p):
     return minutos_a_segundos(p*3 + 30)
@@ -55,10 +58,10 @@ def proximoEvento2(proximoPedido):
 
 
 CANTIDAD_COCINEROS = 2
-PRECIO_DE_HAMBURGUESAS = 13000
+PRECIO_DE_HAMBURGUESAS = 16000
 PRECIO_BASE = 10000
-TF = minutos_a_segundos(60*3.5) #simulacion de 3.5 horas
-DIAS_A_SIMULAR = 30 #simulacion de 25 dias 
+TF = minutos_a_segundos(60*4) #simulacion de 3.5 horas
+DIAS_A_SIMULAR = 16 #simulacion de 25 dias 
 CANTIDAD_FREIDORAS = 3
 CAPACIDAD_PLANCHAS = 6
 
@@ -198,21 +201,21 @@ def main():
     # Unir los porcentajes con comas y mostrarlos entre corchetes
     print(f"Porcentaje de tiempo ocioso de planchas: [{', '.join(porcentajes_formateados)}]")
 
-    print("Promedio de espera de papas fritas: ", segundosAMinutos(pepf))
-    print("Promedio de espera de hamburguesas: ", segundosAMinutos(peh))
-    print("Promedio de espera de ensaladas: ", segundosAMinutos(pee))
-    print(f"Porcentaje de tiempo ocioso de cocinero1: {ptoc1:.2f}%")
-    print(f"Porcentaje de tiempo ocioso de cocinero2: {ptoc2:.2f}%")
-    print("Cantidad de arrepentimientos H entre 10 y 20 minutos: ", contador20)
-    print("Cantidad de arrepentimientos H entre 20 y 40 minutos: ", contador40)
-    print("Cantidad de arrepentimientos H mas de 40 minutos: ", contadorMas40)
-    print("Cantidad total de pedidos: ", n)
-    print("cantidad pedidos de hamburguesas:", contador20 + contador40 + contadorMas40 + nth)
+    print("Promedio de espera de Papas Fritas: ", segundosAMinutos(pepf))
+    print("Promedio de espera de Hamburguesas: ", segundosAMinutos(peh))
+    print("Promedio de espera de Ensaladas: ", segundosAMinutos(pee))
+    print(f"Porcentaje de Tiempo Ocioso de Cocinero 1: {ptoc1:.2f}%")
+    print(f"Porcentaje de Tiempo Ocioso de Cocinero 2: {ptoc2:.2f}%")
+    print("Cantidad de Arrepentimientos H entre 10 y 20 minutos: ", contador20)
+    print("Cantidad de Arrepentimientos H entre 20 y 40 minutos: ", contador40)
+    print("Cantidad de Arrepentimientos H mas de 40 minutos: ", contadorMas40)
+    print("Cantidad Total de Pedidos: ", n)
+    print("Cantidad Pedidos de Hamburguesas:", contador20 + contador40 + contadorMas40 + nth)
     print("Cantidad de Hamburguesas hechas: ", nth)
-    print(f"Porcentaje de arrepentimientos entre 10 y 20 minutos:  {(contador20 * 100) / cantidad_pedidos_hamburugesa:.2f}%")
-    print(f"Porcentaje de arrepentimientos entre 20 y 40 minutos: {(contador40 * 100) / cantidad_pedidos_hamburugesa:.2f}%")
-    print(f"Porcentaje de arrepentimientos mas de 40 minutos: {(contadorMas40 * 100) / cantidad_pedidos_hamburugesa:.2f}%")
-    print(f"Porcentaje de pedidos de Hamburguesas que Hicimos: {(nth * 100) / cantidad_pedidos_hamburugesa:.2f}%")
+    print(f"Porcentaje de Arrepentimientos entre 10 y 20 minutos:  {(contador20 * 100) / cantidad_pedidos_hamburugesa:.2f}%")
+    print(f"Porcentaje de Arrepentimientos entre 20 y 40 minutos: {(contador40 * 100) / cantidad_pedidos_hamburugesa:.2f}%")
+    print(f"Porcentaje de Arrepentimientos mas de 40 minutos: {(contadorMas40 * 100) / cantidad_pedidos_hamburugesa:.2f}%")
+    print(f"Porcentaje de Pedidos de Hamburguesas que Hicimos: {(nth * 100) / cantidad_pedidos_hamburugesa:.2f}%")
     print(f"Ganancias con Hamburguesas: ${nth * 12000:,.0f}")
     print(f"Ganancias con Papas Fritas: ${(sum(ntpf) - (nth*0.8)) * 7000:,.0f}")
 
@@ -263,7 +266,7 @@ def preparacionHamburguesa(t):
             stoc1 = stoc1 + (t - tcc1)
             stop[i_plancha] = stop[i_plancha] + (t - tcp[i_plancha])
             tcp[i_plancha] = t + tah
-
+            tcc1 = t + tah
     else:
         if t <= tcp[i_plancha]:
             arrepentimiento = arrepentimientoRut(t, tcp[i_plancha])
