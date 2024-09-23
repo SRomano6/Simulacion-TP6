@@ -105,6 +105,7 @@ flag = 'Hamburguesa'
 def main():
     dia = 0
     n = 0
+    cantidad_pedidos_hamburugesa = 0
     while(DIAS_A_SIMULAR > dia):
         global tcf, tcp, tcc, chul, arrep
 
@@ -128,6 +129,7 @@ def main():
                 tpppf = intervaloDePedidoPapas(np.random.rand()) + t
                 preparacionPapasFritas(t)
             elif(proximoEvento == "Hamburguesa"):
+                cantidad_pedidos_hamburugesa = cantidad_pedidos_hamburugesa + 1
                 t = tpph
                 tpph = intervaloDePedidoHamburguesa(np.random.rand()) + t
                 preparacionHamburguesa(t)
@@ -172,6 +174,10 @@ def main():
     print("cantidad hamburguesas:", contador20 + contador40 + contadorMas40 + nth)
     print("n: ", n)
     print("nth: ", nth)
+    print("Porcentaje de arrepentimientos entre 10 y 20 minutos: ", (contador20 * 100) / cantidad_pedidos_hamburugesa)
+    print("Porcentaje de arrepentimientos entre 20 y 40 minutos: ", (contador40 * 100) / cantidad_pedidos_hamburugesa)
+    print("Porcentaje de arrepentimientos mas de 40 minutos: ", (contadorMas40 * 100) / cantidad_pedidos_hamburugesa)
+    print("Porcentaje de pedidos de Hamburguesas que Hicimos: ", (nth * 100) / cantidad_pedidos_hamburugesa)
     
 
 def preparacionPapasFritas(t):
