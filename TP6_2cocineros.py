@@ -63,7 +63,7 @@ CANTIDAD_FREIDORAS = 3
 CAPACIDAD_PLANCHAS = 6
 
 # Tiempos comprometidos (inicializados en 0 para cada estac1ión)
-global tcf, tcp, tcc1
+global tcf, tcp, tcc1, tcc2
 tcf = [0] * CANTIDAD_FREIDORAS  # Tiempo Comprometido Freidoras (una lista de ceros del tamaño de las freidoras)
 tcp = [0] * CAPACIDAD_PLANCHAS  # Tiempo Comprometido Planchas (una lista de ceros del tamaño de las planchas)
 tcc1 = 0  
