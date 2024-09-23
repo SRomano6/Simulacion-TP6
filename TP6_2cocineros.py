@@ -166,10 +166,12 @@ def main():
     print("Porcentaje de tiempo ocioso de cocineros2: ", ptoc2)
     print("Porcentaje de tiempo ocioso de planchas: ", ptop)
     print("Porcentaje de tiempo ocioso de freidoras: ", ptof)
-    print("Cantidad de arrepentimientos mas de 40 minutos: ", contador40)
-    print("Cantidad de arrepentimientos mas de 20 minutos: ", contador20)
-    print(contador20 + contador40 + nth)
-
+    print("Cantidad de arrepentimientos entre 10 y 20 minutos: ", contador20)
+    print("Cantidad de arrepentimientos entre 20 y 40 minutos: ", contador40)
+    print("Cantidad de arrepentimientos mas de 40 minutos: ", contadorMas40)
+    print("cantidad hamburguesas:", contador20 + contador40 + contadorMas40 + nth)
+    print("n: ", n)
+    print("nth: ", nth)
 
 
 def preparacionPapasFritas(t):
@@ -271,11 +273,12 @@ def preparacionLimpiezaPlancha(t):
             tcp[i] = t + talp
     chul = 0
 
-global contador20, contador40
+global contador20, contador40, contadorMas40
 contador20 = 0
 contador40 = 0
+contadorMas40 = 0
 def arrepentimientoRut(t, tc):
-    global contador20, contador40
+    global contador20, contador40, contadorMas40
     espera = tc - t
     if espera <= minutos_a_segundos(10):
         return False
@@ -295,7 +298,8 @@ def arrepentimientoRut(t, tc):
                 else:
                     contador40 = contador40 + 1
                     return True
-            else: 
+            else:
+                contadorMas40 = contadorMas40 + 1 
                 return True
         
 if __name__ == "__main__":

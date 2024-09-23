@@ -77,6 +77,7 @@ stee = 0  # Tiempo de Espera Ensaladas
 global ntpf, nth, nte
 ntpf = [0] * CANTIDAD_FREIDORAS  # Número total de pedidos de papas fritas atendidos por freidora
 nth = 0  # Número total de pedidos de hamburguesas atendidos
+aaa = 0  # ///////////////////////////////////////////////////////////////
 nte = 0  # Número total de pedidos de ensaladas atendidos
 
 # Sumatorias
@@ -160,12 +161,13 @@ def main():
     print("Porcentaje de tiempo ocioso de cocineros: ", ptoc)
     print("Porcentaje de tiempo ocioso de planchas: ", ptop)
     print("Porcentaje de tiempo ocioso de freidoras: ", ptof)
-    print("Cantidad de arrepentimientos mas de 40 minutos: ", contador40)
-    print("Cantidad de arrepentimientos mas de 20 minutos: ", contador20)
-    print(contador20 + contador40 + nth)
-
-
-
+    print("Cantidad de arrepentimientos entre 10 y 20 minutos: ", contador20)
+    print("Cantidad de arrepentimientos entre 20 y 40 minutos: ", contador40)
+    print("Cantidad de arrepentimientos mas de 40 minutos: ", contadorMas40)
+    print("cantidad hamburguesas:", contador20 + contador40 + contadorMas40 + nth)
+    print("n: ", n)
+    print("nth: ", nth)
+    
 
 def preparacionPapasFritas(t):
     global tcf, stepf, stof, stapf, ntpf  
@@ -182,7 +184,9 @@ def preparacionPapasFritas(t):
     ntpf[i_freidora] += 1  # Incrementar el contador de pedidos atendidos
 
 def preparacionHamburguesa(t):
-    global tcc, stop, steh, stoc, tcp, arrep, nth, stap, stac, chul, tplp, flag
+    global tcc, stop, steh, stoc, tcp, arrep, nth, stap, stac, chul, tplp, flag, aaa
+
+    aaa = aaa + 1
 
     i_plancha = tcp.index(min(tcp))  # Seleccionar la plancha con menor TCP
     tah = 0 
@@ -197,7 +201,7 @@ def preparacionHamburguesa(t):
                 tcc = tcp[i_plancha] + tah
             else:
                 arrep = arrep + 1
-                pass
+                return
         else:
             tah = tiempoAtencionHamburguesa(np.random.rand())
             stoc = stoc + (t - tcc)
@@ -284,11 +288,12 @@ def preparacionLimpiezaPlancha(t):
             tcp[i] = t + talp
     chul = 0
 
-global contador20, contador40
+global contador20, contador40, contadorMas40
 contador20 = 0
 contador40 = 0
+contadorMas40 = 0
 def arrepentimientoRut(t, tc):
-    global contador20, contador40
+    global contador20, contador40, contadorMas40
     espera = tc - t
     if espera <= minutos_a_segundos(10):
         return False
@@ -308,7 +313,8 @@ def arrepentimientoRut(t, tc):
                 else:
                     contador40 = contador40 + 1
                     return True
-            else: 
+            else:
+                contadorMas40 = contadorMas40 + 1 
                 return True
         
 if __name__ == "__main__":
