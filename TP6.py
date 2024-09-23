@@ -7,7 +7,11 @@ def intervaloDePedidoHamburguesa(p):
     a = 4.651616792818317
     loc = 68.96346392723524
     scale = 12.76110784225058
-    return exponnorm.ppf(p, a, loc, scale) 
+    
+    # Elasticidad no lineal: cuanto mayor sea el precio, más aumenta el intervalo de manera exponencial
+    factor_precio = np.exp((PRECIO_DE_HAMBURGUESAS - PRECIO_BASE) / PRECIO_BASE)
+    
+    return exponnorm.ppf(p, a, loc, scale) * factor_precio
 
 def intervaloDePedidoEnsalada(p):
     return minutos_a_segundos(p*3 +10)
@@ -51,7 +55,8 @@ def proximoEvento2(proximoPedido):
 
 
 CANTIDAD_COCINEROS = 1
-PRECIO_HAMBURGUESA = 200
+PRECIO_DE_HAMBURGUESAS = 12000
+PRECIO_BASE = 10000
 TF = minutos_a_segundos(60*3.5) #simulacion de 3.5 horas
 DIAS_A_SIMULAR = 10 #simulacion de 25 dias 
 CANTIDAD_FREIDORAS = 2
