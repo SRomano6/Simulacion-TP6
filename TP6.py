@@ -84,7 +84,6 @@ stee = 0  # Tiempo de Espera Ensaladas
 global ntpf, nth, nte
 ntpf = [0] * CANTIDAD_FREIDORAS  # Número total de pedidos de papas fritas atendidos por freidora
 nth = 0  # Número total de pedidos de hamburguesas atendidos
-aaa = 0  # ///////////////////////////////////////////////////////////////
 nte = 0  # Número total de pedidos de ensaladas atendidos
 
 # Sumatorias
@@ -238,15 +237,24 @@ def preparacionPapasFritas(t):
     ntpf[i_freidora] += 1  # Incrementar el contador de pedidos atendidos
 
 def preparacionHamburguesa(t):
-    global tcc, stop, steh, stoc, tcp, arrep, nth, stap, stac, chul, tplp, flag, aaa
+    global tcc, stop, steh, stoc, tcp, arrep, nth, stap, stac, chul, tplp, flag
 
-    aaa = aaa + 1
+    i_freidora = tcf.index(min(tcf))  # Seleccionar la freidora con menor TCF
+    
+    r = np.random.rand()
+
 
     i_plancha = tcp.index(min(tcp))  # Seleccionar la plancha con menor TCP
     tah = 0 
+
+    if r <= 0.8:
+        maxTC = max(tcp[i_plancha], tcf[i_freidora])  
+    else:
+        maxTC = max(tcp[i_plancha], tcc) 
+        
     if tcp[i_plancha] > tcc:
         if t <= tcp[i_plancha]:
-            arrepentimiento = arrepentimientoRut(t, tcp[i_plancha])
+            arrepentimiento = arrepentimientoRut(t, maxTC)
             if not arrepentimiento:
                 tah = tiempoAtencionHamburguesa(np.random.rand())
                 stoc = stoc + (tcp[i_plancha] - tcc) 
@@ -262,11 +270,10 @@ def preparacionHamburguesa(t):
             stop[i_plancha] = stop[i_plancha] + (t - tcp[i_plancha])
             tcp[i_plancha] = t + tah
             tcc = t + tah
-
     else:
         if t <= tcc:
             if flag == 'Ensalada':       
-                arrepentimiento = arrepentimientoRut(t, tcc)
+                arrepentimiento = arrepentimientoRut(t, maxTC)
                 if not arrepentimiento:
                     tah = tiempoAtencionHamburguesa(np.random.rand())
                     stop[i_plancha] = stop[i_plancha] + (tcc - tcp[i_plancha])
@@ -279,7 +286,11 @@ def preparacionHamburguesa(t):
             else:
                 tah = tiempoAtencionHamburguesa(np.random.rand())
                 if t <= tcp[i_plancha]:
-                    arrepentimiento = arrepentimientoRut(t, tcp[i_plancha])
+                    if r <= 0.8:
+                        maxTC = max(tcp[i_plancha], tcf[i_freidora])  
+                    else:
+                        maxTC = tcp[i_plancha]
+                    arrepentimiento = arrepentimientoRut(t, maxTC)
                     if not arrepentimiento:
                         steh = steh + (tcp[i_plancha] - t)
                         tcp[i_plancha] = tcp[i_plancha] + tah
@@ -309,7 +320,7 @@ def preparacionHamburguesa(t):
             tcp[i] = tcp[tcp.index(max(tcp))] + talp
         tplp = tcp[i_plancha] + intervaloLimpiezaDePlancha()
         chul = 0
-    r = np.random.rand()
+
     if r <= 0.8: 
         preparacionPapasFritas(t)
     else:
