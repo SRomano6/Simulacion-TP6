@@ -1,23 +1,28 @@
 import numpy as np
-from scipy.stats import exponnorm
+from scipy.stats import skewnorm
 from scipy.stats import truncpareto
-from scipy.stats import rel_breitwigner
-
-def intervaloDePedidoHamburguesa2(p):
-    a = 4.651616792818317
-    loc = 68.96346392723524
-    scale = 12.76110784225058
-
-    # Elasticidad no lineal: cuanto mayor sea el precio, más aumenta el intervalo de manera exponencial
-    factor_precio = np.exp((PRECIO_DE_HAMBURGUESAS - PRECIO_BASE) / PRECIO_BASE)
-
-    return exponnorm.ppf(p, a, loc, scale) * factor_precio
+from scipy.stats import vonmises_line
 
 def intervaloDePedidoHamburguesa(p):
+    a = 4.044016581362492
+    loc =205.85701604001605
+    scale = 100.42542523537097
+    
+    # Elasticidad no lineal: cuanto mayor sea el precio, más aumenta el intervalo de manera exponencial
+    factor_precio = np.exp((PRECIO_DE_HAMBURGUESAS - PRECIO_BASE) / PRECIO_BASE)
+    return skewnorm.ppf(p , a, loc, scale) * factor_precio
+
+def intervaloDePedidoHamburguesa2(p):
     return minutos_a_segundos(p*1 + 7)
 
-def intervaloDePedidoEnsalada(p):
+def intervaloDePedidoEnsalada2(p):
     return minutos_a_segundos(p*3 + 30)
+
+def intervaloDePedidoEnsalada(p):
+    a = 0.04089227022947282
+    loc =1890.0025157344721
+    scale = 28.648690644317014
+    return vonmises_line.ppf(p , a, loc, scale)
     
 
 def intervaloDePedidoPapas(p):
@@ -34,7 +39,7 @@ def tiempoAtencionEnsalada(p):
     return minutos_a_segundos(3*p + 8)
 
 def tiempoAtencionPapasFritas(p):
-    return minutos_a_segundos(3*p + 7)
+    return minutos_a_segundos(3*p + 8)
 
 def tiempoLimpiezaPlancha(p):
     return minutos_a_segundos(5*p + 5)
@@ -58,10 +63,10 @@ def proximoEvento2(proximoPedido):
 
 
 CANTIDAD_COCINEROS = 2
-PRECIO_DE_HAMBURGUESAS = 16000
+PRECIO_DE_HAMBURGUESAS = 12000
 PRECIO_BASE = 10000
-TF = minutos_a_segundos(60*4) #simulacion de 3.5 horas
-DIAS_A_SIMULAR = 16 #simulacion de 25 dias 
+TF = minutos_a_segundos(60*4) #simulacion de 4 horas
+DIAS_A_SIMULAR = 1600 #simulacion de 25 dias 
 CANTIDAD_FREIDORAS = 3
 CAPACIDAD_PLANCHAS = 6
 

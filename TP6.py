@@ -33,7 +33,7 @@ def tiempoAtencionEnsalada(p):
     return minutos_a_segundos(3*p + 8)
 
 def tiempoAtencionPapasFritas(p):
-    return minutos_a_segundos(3*p + 7)
+    return minutos_a_segundos(3*p + 8)
 
 def tiempoLimpiezaPlancha(p):
     return minutos_a_segundos(5*p + 5)
@@ -57,9 +57,9 @@ def proximoEvento2(proximoPedido):
 
 
 CANTIDAD_COCINEROS = 1
-PRECIO_DE_HAMBURGUESAS = 20000
+PRECIO_DE_HAMBURGUESAS = 12000
 PRECIO_BASE = 10000
-TF = minutos_a_segundos(60*4) #simulacion de 3.5 horas
+TF = minutos_a_segundos(60*4) #simulacion de 4 horas
 DIAS_A_SIMULAR = 16 #simulacion de 25 dias 
 CANTIDAD_FREIDORAS = 2
 CAPACIDAD_PLANCHAS = 6
