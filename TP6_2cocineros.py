@@ -12,25 +12,18 @@ def intervaloDePedidoHamburguesa(p):
     factor_precio = np.exp((PRECIO_DE_HAMBURGUESAS - PRECIO_BASE) / PRECIO_BASE)
     return skewnorm.ppf(p , a, loc, scale) * factor_precio
 
-def intervaloDePedidoHamburguesa2(p):
-    return minutos_a_segundos(p*1 + 7)
-
-def intervaloDePedidoEnsalada2(p):
-    return minutos_a_segundos(p*3 + 30)
-
 def intervaloDePedidoEnsalada(p):
-    a = 0.04089227022947282
+    kappa = 0.04089227022947282
     loc =1890.0025157344721
     scale = 28.648690644317014
-    return vonmises_line.ppf(p , a, loc, scale)
+    return vonmises_line.ppf(p , kappa, loc, scale)
     
-
 def intervaloDePedidoPapas(p):
-    a = 22933.735496143887
-    b = 1.0000013411007824
+    b = 22933.735496143887
+    c = 1.0000013411007824
     loc = -134217740.8463965
     scale = 134218100.84639648
-    return truncpareto.ppf(p ,a,b,  loc, scale)
+    return truncpareto.ppf(p, b, c, loc, scale)
 
 def tiempoAtencionHamburguesa(p):
     return minutos_a_segundos(4*p + 8)
