@@ -60,7 +60,7 @@ CANTIDAD_COCINEROS = 1
 PRECIO_DE_HAMBURGUESAS = 12000
 PRECIO_BASE = 10000
 TF = minutos_a_segundos(60*4) #simulacion de 4 horas
-DIAS_A_SIMULAR = 16 #simulacion de 25 dias 
+DIAS_A_SIMULAR = 1600 #simulacion de 1600 dias 
 CANTIDAD_FREIDORAS = 2
 CAPACIDAD_PLANCHAS = 6
 
@@ -174,10 +174,6 @@ def main():
     print(f"Porcentaje de tiempo ocioso de planchas: [{', '.join(porcentajes_formateados)}]")
 
 
-
-
-
-
     ptof = []
     for i in range(0, len(stof)):
         ptof.append(float((stof[i]*100) / (stof[i] + stapf[i])))
@@ -208,31 +204,20 @@ def main():
     print(f"Porcentaje de Pedidos de Hamburguesas que Hicimos: {(nth * 100) / cantidad_pedidos_hamburugesa:.2f}%")
     print(f"Ganancias con Hamburguesas: ${nth * 12000:,.0f}")
     print(f"Ganancias con Papas Fritas: ${(sum(ntpf) - (nth*0.8)) * 7000:,.0f}")
-
-
-
-    #print(f"Porcentaje de arrepentimientos PF entre 10 y 20 minutos:  {(contadorArrepPF20 * 100) / cantidad_pedidos_papas:.2f}%")
-    #print(f"Porcentaje de arrepentimientos PF entre 20 y 40 minutos: {(contadorArrepPF40 * 100) / cantidad_pedidos_papas:.2f}%")
-    #print(f"Porcentaje de arrepentimientos PF mas de 40 minutos: {(contadorArrepPFMas40 * 100) / cantidad_pedidos_papas:.2f}%")
     
 
 def preparacionPapasFritas(t):
     global tcf, stepf, stof, stapf, ntpf, arrepPF  
     
     i_freidora = tcf.index(min(tcf))  # Seleccionar la freidora con menor TCF
-
-    #arrepentimiento = arrepentimientoRutPF(t, tcf[i_freidora])
-    #if not arrepentimiento:
     tapf  = tiempoAtencionPapasFritas(np.random.rand())
+
     if t <= tcf[i_freidora]:  # Freidora ocupada
         stepf[i_freidora] += (tcf[i_freidora] - t)  # Sumar al acumulador de espera
         tcf[i_freidora] += tapf  # Actualizar el tiempo comprometido
     else:  # Freidora disponible
         stof[i_freidora] += (t - tcf[i_freidora])  # Sumar al tiempo ocioso
         tcf[i_freidora] = t + tapf  # Actualizar el tiempo comprometido
-    #else:
-    #    arrepPF = arrepPF + 1
-    #    return 
     stapf[i_freidora] += tapf
     ntpf[i_freidora] += 1  # Incrementar el contador de pedidos atendidos
 
@@ -242,7 +227,6 @@ def preparacionHamburguesa(t):
     i_freidora = tcf.index(min(tcf))  # Seleccionar la freidora con menor TCF
     
     r = np.random.rand()
-
 
     i_plancha = tcp.index(min(tcp))  # Seleccionar la plancha con menor TCP
     tah = 0 
@@ -383,34 +367,5 @@ def arrepentimientoRut(t, tc):
             else:
                 contadorMas40 = contadorMas40 + 1 
                 return True
-global contadorArrepPF20, contadorArrepPF40, contadorArrepPFMas40
-contadorArrepPF20 = 0
-contadorArrepPF40 = 0
-contadorArrepPFMas40 = 0
-def arrepentimientoRutPF(t, tc):
-    global contadorArrepPF20, contadorArrepPF40, contadorArrepPFMas40
-    espera = tc - t
-    if espera <= minutos_a_segundos(10):
-        return False
-    else:
-        if espera <= minutos_a_segundos(20):
-            r = np.random.rand()
-            if r <= 0.7:
-                return False
-            else:
-                contadorArrepPF20 = contadorArrepPF20 + 1
-                return True
-        else:
-            if espera <= minutos_a_segundos(40):
-                r = np.random.rand()
-                if r <= 0.2:
-                    return False
-                else:
-                    contadorArrepPF40 = contadorArrepPF40 + 1
-                    return True
-            else:
-                contadorArrepPFMas40 = contadorArrepPFMas40 + 1 
-                return True
-        
 if __name__ == "__main__":
     main()
